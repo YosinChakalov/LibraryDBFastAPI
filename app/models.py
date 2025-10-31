@@ -52,3 +52,10 @@ class BookModel(BaseModel):
 
     def __repr__(self):
         return f"book {self.title}"
+    
+
+class BlackList(BaseModel):
+    __tablename__ = 'blackList'
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    jwt = Column(String, nullable = False)

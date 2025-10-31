@@ -1,10 +1,13 @@
 from fastapi import APIRouter,Depends,HTTPException
+from fastapi.security import HTTPAuthorizationCredentials
 from .schemas import *
 from .auth import sign_jwt,decode_jwt
 from sqlalchemy.orm import Session
 from .models import UserModel
 from db_config import get_my_db
 from .helpers import hash_password,verify_password
+from .auth import security
+from .models import *
 
 
 auth = APIRouter()
@@ -44,3 +47,13 @@ async def login_view(user_data: UserLoginSchema, db: Session = Depends(get_my_db
 
     token = sign_jwt(user.email)
     return {"accsess_token":token}
+
+@auth.post("/logout")
+async def logout_view(db: Session = Depends(get_my_db), creds: HTTPAuthorizationCredentials = Depends(security)):
+    jwttoken = creds.credentials
+    print(jwttoken)
+    blackListJwt = BlackList(jwt=jwttoken)
+    db.add(blackListJwt)
+    db.commit()
+    db.refresh(blackListJwt)
+    return {"Message": "logged out"}
